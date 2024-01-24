@@ -1,36 +1,26 @@
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import Controls from "../Controls/index";
 import Map from "../Map/index";
+import { HelloMessage } from "./ISSTracker.styled";
 
-const URL = "https://api.wheretheiss.at/v1/satellites/25544";
-
+const fetcher = (url) => fetch(url).then((res) => res.json());
 export default function ISSTracker() {
-  const [coords, setCoords] = useState({
-    longitude: 0,
-    latitude: 0,
+  const {
+    data: coords,
+    isLoading,
+    error,
+    mutate,
+  } = useSWR("https://api.wheretheiss.at/v1/satellites/25544", fetcher, {
+    refreshInterval: 5000,
   });
 
-  async function getISSCoords() {
-    try {
-      const response = await fetch(URL);
-      if (response.ok) {
-        const data = await response.json();
-        setCoords({ longitude: data.longitude, latitude: data.latitude });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      getISSCoords();
-    }, 5000);
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+  if (error) return <div>failed to load</div>;
+  if (isLoading)
+    return (
+      <div>
+        <span> 🔄 </span>loading...
+      </div>
+    );
 
   return (
     <main>
@@ -38,8 +28,11 @@ export default function ISSTracker() {
       <Controls
         longitude={coords.longitude}
         latitude={coords.latitude}
-        onRefresh={getISSCoords}
+        onRefresh={() => mutate()}
       />
+      <HelloMessage>
+        You are seeing the actual position of {coords.name.toUpperCase()}{" "}
+      </HelloMessage>
     </main>
   );
 }
