@@ -2,12 +2,13 @@ import useSWR from "swr";
 import Controls from "../Controls/index";
 import Map from "../Map/index";
 import { HelloMessage } from "./ISSTracker.styled";
+import styled from "styled-components";
 
 const fetcher = async (url) => {
   const res = await fetch(url);
 
   if (!res.ok) {
-    const error = new Error("An Error occurred while fetching");
+    const error = new Error("An Error occurred while fetching !!!");
     console.log(error);
     error.info = await res.json();
     error.status = res.status;
@@ -27,7 +28,7 @@ export default function ISSTracker() {
     refreshInterval: 5000,
   });
 
-  if (error) return <div>failed to load</div>;
+  if (error) return <StyledError>{error.message.toUpperCase()}</StyledError>;
   if (isLoading)
     return (
       <div>
@@ -49,3 +50,11 @@ export default function ISSTracker() {
     </main>
   );
 }
+
+const StyledError = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  color: red;
+  font-size: 2rem;
+`;
