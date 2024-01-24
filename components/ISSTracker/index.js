@@ -3,7 +3,20 @@ import Controls from "../Controls/index";
 import Map from "../Map/index";
 import { HelloMessage } from "./ISSTracker.styled";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+const fetcher = async (url) => {
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    const error = new Error("An Error occurred while fetching");
+    console.log(error);
+    error.info = await res.json();
+    error.status = res.status;
+    throw error;
+  }
+
+  return res.json();
+};
+
 export default function ISSTracker() {
   const {
     data: coords,
